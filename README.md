@@ -9,5 +9,11 @@
 - Restart HA
 - Add wled_joy from integration
 
+## To work properly
+
+- Lights should be deleted in the official component first
+- Lights could only be added by auto-discovery(Bug, might fix later)
+- Restart HA after modifying any files in the component
+
 ![](/pic0.jpg)
 ![](/pic1.jpg)
