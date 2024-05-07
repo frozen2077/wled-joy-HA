@@ -130,7 +130,7 @@ class WLEDSegmentLight(WLEDEntity, LightEntity):
         self._rgbw = coordinator.data.info.leds.rgbw
         self._wv = coordinator.data.info.leds.wv
         self._segment = segment
-        self._ct
+        self._ct = 300
 
         # Segment 0 uses a simpler name, which is more natural for when using
         # a single segment / using WLED with one big LED strip.
@@ -272,11 +272,15 @@ class WLEDSegmentLight(WLEDEntity, LightEntity):
             data[ATTR_BRIGHTNESS] = kwargs[ATTR_BRIGHTNESS]
 
         if ATTR_EFFECT in kwargs:
-            if kwargs[ATTR_EFFECT] == 'Solid@;!;' :
-                data[ATTR_EFFECT] = kwargs[ATTR_EFFECT]
-            else :
+            data[ATTR_EFFECT] = kwargs[ATTR_EFFECT]           
+            if kwargs[ATTR_EFFECT] != 'Solid@;!;' :
                 await self.coordinator.wled.preset(preset=kwargs[ATTR_EFFECT])
-                return
+                return            
+            # if kwargs[ATTR_EFFECT] == 'Solid@;!;' :
+            #     data[ATTR_EFFECT] = kwargs[ATTR_EFFECT]
+            # else :
+            #     await self.coordinator.wled.preset(preset=kwargs[ATTR_EFFECT])
+            #     return
 
         # If there is no main control, and only 1 segment, handle the main
         if not self.coordinator.has_main_light:
