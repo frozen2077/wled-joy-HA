@@ -1,4 +1,3 @@
----
 🛠️Added support to version Core 12.5 (wled v0.20.2)
 ---
 # Modded the official WLED integration with color temperature support (not CCT)
