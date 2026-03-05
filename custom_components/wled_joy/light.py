@@ -9,8 +9,7 @@ import logging
 
 
 from homeassistant.components.light import (
-    ATTR_BRIGHTNESS,
-    ATTR_COLOR_TEMP,    
+    ATTR_BRIGHTNESS, 
     ATTR_COLOR_TEMP_KELVIN,
     ATTR_EFFECT,
     ATTR_RGB_COLOR,
@@ -23,10 +22,7 @@ from homeassistant.components.light import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.util.color as color_util
-from homeassistant.util.color import (
-    color_temperature_kelvin_to_mired as kelvin_to_mired,
-    color_temperature_mired_to_kelvin as mired_to_kelvin,
-)
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -126,8 +122,6 @@ class WLEDSegmentLight(WLEDEntity, LightEntity):
     _attr_translation_key = "segment"
     _attr_min_color_temp_kelvin = COLOR_TEMP_K_MIN
     _attr_max_color_temp_kelvin = COLOR_TEMP_K_MAX
-    _attr_min_mireds = kelvin_to_mired(COLOR_TEMP_K_MIN)
-    _attr_max_mireds = kelvin_to_mired(COLOR_TEMP_K_MAX)
 
     def __init__(
         self,
@@ -137,7 +131,6 @@ class WLEDSegmentLight(WLEDEntity, LightEntity):
         """Initialize WLED segment light."""
         super().__init__(coordinator=coordinator)
         self._segment = segment
-        self._ct = 300
 
         # Segment 0 uses a simpler name, which is more natural for when using
         # a single segment / using WLED with one big LED strip.
@@ -185,14 +178,6 @@ class WLEDSegmentLight(WLEDEntity, LightEntity):
         if not (color := self.coordinator.data.state.segments[self._segment].color):
             return None
         return cast(tuple[int, int, int, int], color.primary)
-
-    @property
-    def color_temp(self) -> int | None:
-        """Return the color temperature."""
-        if self._attr_color_mode == ColorMode.COLOR_TEMP :
-            return self._ct
-        else :
-            return 300
 
     @property
     def color_temp_kelvin(self) -> int | None:
@@ -272,15 +257,13 @@ class WLEDSegmentLight(WLEDEntity, LightEntity):
             data[ATTR_COLOR_PRIMARY] = kwargs[ATTR_RGBW_COLOR]
             self._attr_color_mode = ColorMode.RGBW
 
-        if ATTR_COLOR_TEMP in kwargs:       
-            data[ATTR_COLOR_PRIMARY] = convert_K_to_RGB(mired_to_kelvin((kwargs[ATTR_COLOR_TEMP])))
-            self._ct = kwargs[ATTR_COLOR_TEMP]
-            self._attr_color_mode = ColorMode.COLOR_TEMP
-
         if ATTR_COLOR_TEMP_KELVIN in kwargs:
+            kelvin_val = kwargs[ATTR_COLOR_TEMP_KELVIN]
+            data[ATTR_COLOR_PRIMARY] = convert_K_to_RGB(kelvin_val)
             data[ATTR_CCT] = kelvin_to_255(
-                kwargs[ATTR_COLOR_TEMP_KELVIN], COLOR_TEMP_K_MIN, COLOR_TEMP_K_MAX
+                kelvin_val, COLOR_TEMP_K_MIN, COLOR_TEMP_K_MAX
             )
+            self._attr_color_mode = ColorMode.COLOR_TEMP
 
         if ATTR_TRANSITION in kwargs:
             # WLED uses 100ms per unit, so 10 = 1 second.
